@@ -1,0 +1,11 @@
+{
+  "name": "Yelp on MealPal",
+  "version": "1.0",
+  "description": "Check Yelp ratings when choosing your MealPal meal",
+  "manifest_version": 2,
+  "author": "Priya Ghose",
+  "browser_action": {
+    "default_popup": "index.html"
+  }
+}
+ 
