@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import './App.css';
-import { apiKey } from './apiKey.js';
 
 const yelp = require('yelp-fusion');
 const client = yelp.client(apiKey);
@@ -24,23 +23,12 @@ class App extends Component {
     // for final version, start with an empty mealpalRestaurants array and push in restaurants that I find on page
     // MUST MOVE GET REQUEST INTO SERVER
     // YOUTUBE API DOES NOT CURRENTLY SUPPORT CLIENT-SIDE DATA REQUESTS
-    mealpalRestaurants.forEach(function({name, address}) {
-      const searchRequest = {
-        term: name,
-        location: address
-      };
-      client.search(searchRequest).then(response => {
-        const firstResult = response.jsonBody.businesses[0];
-        const prettyJson = JSON.stringify(firstResult, ['id'], 4);
-        console.log(prettyJson);
-      }).catch(e => {
-        console.log('error is: ', e);
-      });
-    })
+
   }
 
 
   render() {
+    // Update star rendering to: https://www.yelp.com/developers/display_requirements
     const restaurantListings = this.state.yelpRestaurants.map(({restaurant, rating, url}, index) =>
       <li key={index}><a href={url} target="_blank">{restaurant}</a> {rating} stars</li>
     );

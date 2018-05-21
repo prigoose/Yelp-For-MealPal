@@ -10,8 +10,7 @@
 /build
 
 # security
-testingYelpAPI
-/src/apiKey.js
+apiKey.js
 
 # misc
 .DS_Store
