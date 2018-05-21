@@ -1,8 +1,10 @@
 const express = require('express');
-const app = express();
+const cors = require('cors')
 const yelp = require('yelp-fusion');
 const { apiKey } = require('./apiKey.js');
 
+const app = express();
+app.use(cors());
 const client = yelp.client(apiKey);
 
 // read more on setting env vars in create-react-app
@@ -14,12 +16,14 @@ app.get('/rating', function(req, res){
     term: req.query.term,
     location: req.query.location
   };
-  client.search(searchRequest).then(response => {
-    const firstResult = response.jsonBody.businesses[0];
+  client.search(searchRequest).then(searchResponse => {
+    const firstResult = searchResponse.jsonBody.businesses[0];
     const id = firstResult.id;
-    client.business(id).then(response => {
-      JSONrating = JSON.stringify(response.jsonBody.rating);
-      res.send(JSONrating);
+    client.business(id).then(businessResponse => {
+      rating = businessResponse.jsonBody.rating;
+      url = businessResponse.jsonBody.url;
+      name = businessResponse.jsonBody.name;
+      res.send(JSON.stringify({name, rating, url}));
     }).catch(e => {
       res.send(e);
     });
