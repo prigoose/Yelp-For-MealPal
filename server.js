@@ -9,11 +9,7 @@ const client = yelp.client(apiKey);
 // https://medium.com/@tacomanator/environments-with-create-react-app-7b645312c09d
 port = 3002;
 
-// this express server will not serve static files
-// the static files are served directly in the chrome extension, 
-// which will look at my index.html and other items in my 'public' folder
-
-app.get('/search', function(req, res){
+app.get('/rating', function(req, res){
   console.log('req.query.term: ', req.query.term);
   console.log('req.query.location: ', req.query.location);
   const searchRequest = {
@@ -23,17 +19,12 @@ app.get('/search', function(req, res){
   client.search(searchRequest).then(response => {
     const firstResult = response.jsonBody.businesses[0];
     const id = firstResult.id;
-    const JSONid = JSON.stringify(id);
-    res.send(JSONid);
-  }).catch(e => {
-    res.send(e);
-  });
-});
-
-app.get('/details', function(req, res){
-  client.business(req.query.id).then(response => {
-    JSONrating = JSON.stringify(response.jsonBody.rating);
-    res.send(JSONrating);
+    client.business(id).then(response => {
+      JSONrating = JSON.stringify(response.jsonBody.rating);
+      res.send(JSONrating);
+    }).catch(e => {
+      res.send(e);
+    });
   }).catch(e => {
     res.send(e);
   });
