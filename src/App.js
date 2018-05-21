@@ -6,13 +6,14 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      yelpRestaurants: [
-        {name: 'The Melt', rating: 3.5, url: 'https://www.yelp.com/biz/the-melt-san-francisco-9?osq=the+melt'},
-        {name: 'Farmerbrown', rating: 3.5, url: 'https://www.yelp.com/biz/farmerbrown-san-francisco-2'}
-      ],
+      yelpRestaurants: [],
       mealpalRestaurants: [
         {name: 'Chipotle', address: '126 New Montgomery, San Francisco, CA'},
-        {name: 'Buckhorn Grill', address: '845 Market St, San Francisco, CA'}
+        {name: 'Buckhorn Grill', address: '845 Market St, San Francisco, CA'},
+        {name: 'Flying Falafel', address: '1051 Market St., San Francisco, CA'},
+        {name: 'Tokyo Express', address: '814 Mission St., San Francisco, CA'},
+        {name: 'The Organic Coup', address: '224 Kearny St., San Francisco, CA'},
+        {name: 'Kaisen Sushi', address: '71 5th St., San Francisco, CA'}
       ]
     }
   }
@@ -20,11 +21,12 @@ class App extends Component {
   componentDidMount() {
     // for final version, set this.state.mealpalRestaurants = []; 
     // then use webcrawler to grab restaurants from mealpal listings page
+    // make sure to cut anything after the dash, because yelp will get confused and give you worse responses
+      // e.g. `Tokyo Express- Moscone Center` returns Samovar Tea Lounge. 
+      // But `Tokyo Express` returns Tokyo Express
     // then push restaurants into array
 
-    // now make get request calls to get the ratings for each restaurant
 
-    // for each restaurant in mealPalRestaurants array 
     const newYelpRestaurants = [];
 
     // In order to move quickly, I'm saving the value of 
@@ -50,22 +52,41 @@ class App extends Component {
         console.log(error);
       });
     })
-
-    // console.log('newYelpRestaurants :', newYelpRestaurants);
-    // var test = [{name: 'test', rating: 2, url: 'google.com'}]
-    // console.log('typeof test: ', typeof test);
-    // this.setState({
-    //   yelpRestaurants: test
-    // });
-    // console.log('this.state.yelpRestaurants: ', this.state.yelpRestaurants);
   }
 
 
   render() {
     // Update star rendering to: https://www.yelp.com/developers/display_requirements
-    const restaurantListings = this.state.yelpRestaurants.map(({name, rating, url}, index) =>
-      <li key={index}><a href={url} target="_blank">{name}</a> {rating} stars</li>
-    );
+
+    // I'm worried about performing an expensive sorting operation on the client side
+    // but I'll do it for an MVP implementation
+    // Ask Danny for advice moving forward
+    var restaurants = [...this.state.yelpRestaurants];
+    restaurants.sort((a,b) => {
+      if (a.name < b.name) {
+        return -1;
+      }
+      else {
+        return 1;
+      }
+    });
+    const restaurantListings = restaurants.map(({name, rating, url}, index) =>
+    <li key={index}><a href={url} target="_blank">{name}</a> {rating} stars</li>
+  );
+
+  // to do: refactor so that restaurants show up in the order they are shown on the 
+  // mealpal listings page.
+  // Implementation hypothesis:
+    // - change yelpRestaurants from an array to an object, where the keys are restaurant names
+    // - map the mealpalRestaurants array (which is in the correct order) to divs, grabbing
+      // relevant data from yelpRestaurants with restaurant name'
+  // this.state.mealpalRestaurants.map(({name}, index) => 
+  //   <li key={index}><a href={url} target="_blank">{name}</a> {rating} stars</li>
+  // )
+
+    // const restaurantListings = this.state.yelpRestaurants.map(({name, rating, url}, index) =>
+    //   <li key={index}><a href={url} target="_blank">{name}</a> {rating} stars</li>
+    // );
     return (
       <div className="App">
         <p className="Restaurant-listings">
