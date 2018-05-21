@@ -10,8 +10,6 @@ const client = yelp.client(apiKey);
 port = 3002;
 
 app.get('/rating', function(req, res){
-  console.log('req.query.term: ', req.query.term);
-  console.log('req.query.location: ', req.query.location);
   const searchRequest = {
     term: req.query.term,
     location: req.query.location
