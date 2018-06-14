@@ -12,4 +12,9 @@ This Chrome extension crawls the listings page for the restaurants listed, and t
 - Cheerio.js for web crawling
 - Yelp Fusion API for restaurant data
 
+## Setup
+
+1. `npm run server`
+2. `npm start`
+
 *This project was bootstrapped with [Create React App](https://github.com/facebookincubator/create-react-app).
