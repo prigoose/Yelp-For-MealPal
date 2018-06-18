@@ -1,19 +1,26 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import './App.css';
+let cheerio = require('cheerio');
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      yelpRestaurants: [],
+      yelpRestaurants: [
+        {name: 'Veracio\'s Pizza & Ice Cream', rating: 3.5, url: 'https://www.yelp.com/biz/veracios-pizza-san-francisco'},
+        {name: 'Steap Tea Bar', rating: 4.5, url: 'https://www.yelp.com/biz/steap-tea-bar-san-francisco-3'},
+        {name: 'Schilling Cafe', rating: 3.5, url: 'https://www.yelp.com/biz/schilling-cafe-san-francisco'}
+      ],
       mealpalRestaurants: [
-        {name: 'Chipotle', address: '126 New Montgomery, San Francisco, CA'},
-        {name: 'Buckhorn Grill', address: '845 Market St, San Francisco, CA'},
-        {name: 'Flying Falafel', address: '1051 Market St., San Francisco, CA'},
-        {name: 'Tokyo Express', address: '814 Mission St., San Francisco, CA'},
-        {name: 'The Organic Coup', address: '224 Kearny St., San Francisco, CA'},
-        {name: 'Kaisen Sushi', address: '71 5th St., San Francisco, CA'}
+        {name: 'Veracio\'s Pizza & Ice Cream', address: '32 6th St.'},
+        {name: 'Steap Tea Bar', address: '827 Sacramento St'},
+        {name: 'Schilling Cafe', address: '667-669 Commercial St.'},
+        {name: 'Battery St. Coffee Roastery', address: '950 Battery St.'},
+        {name: 'Frena Bakery', address: '132 6th St.'},
+        {name: 'Chaat Corner', address: '138 Cyril Magnin St.'},
+        {name: 'New Delhi', address: '160 Ellis St'},
+        {name: 'Slice House', address: '680 A Second St.'}
       ]
     }
   }
@@ -26,13 +33,12 @@ class App extends Component {
       // But `Tokyo Express` returns Tokyo Express
     // then push restaurants into array
 
-
     const newYelpRestaurants = [];
 
     // In order to move quickly, I'm saving the value of 
-    // `this` with a variable called `thisCheat`
+    // `this` with a variable called `app`
     // Refactor later
-    const thisCheat = this;
+    const app = this;
 
     this.state.mealpalRestaurants.forEach(restaurant => {
       axios.get('http://localhost:3002/rating', {
@@ -42,9 +48,8 @@ class App extends Component {
         }
       })
       .then(function (response) {
-        console.log('response.data type is: ', typeof response.data)
         newYelpRestaurants.push(response.data);
-        thisCheat.setState({
+        app.setState({
           yelpRestaurants: newYelpRestaurants
         });
       })
@@ -54,6 +59,31 @@ class App extends Component {
     })
   }
 
+  renderStars(rating) {
+    if (rating === 0) {
+      return <img src="https://s3-us-west-1.amazonaws.com/yelpstars/small_0.png" alt="0 stars"></img>
+    } else if (rating === .5) {
+      return <img src="https://s3-us-west-1.amazonaws.com/yelpstars/small_0_half.png" alt="0.5 stars"></img>
+    } else if (rating === 1) {
+      return <img src="https://s3-us-west-1.amazonaws.com/yelpstars/small_1.png" alt="1 stars"></img>
+    } else if (rating === 1.5) {
+      return <img src="https://s3-us-west-1.amazonaws.com/yelpstars/small_1_half.png" alt="1.5 stars"></img>
+    } else if (rating === 2) {
+      return <img src="https://s3-us-west-1.amazonaws.com/yelpstars/small_2.png" alt="2 stars"></img>
+    } else if (rating === 2.5) {
+      return <img src="https://s3-us-west-1.amazonaws.com/yelpstars/small_2_half.png" alt="2.5 stars"></img>
+    } else if (rating === 3) {
+      return <img src="https://s3-us-west-1.amazonaws.com/yelpstars/small_3.png" alt="3 stars"></img>
+    } else if (rating === 3.5) {
+      return <img src="https://s3-us-west-1.amazonaws.com/yelpstars/small_3_half.png" alt="3.5 stars"></img>
+    } else if (rating === 4) {
+      return <img src="https://s3-us-west-1.amazonaws.com/yelpstars/small_4.png" alt="4 stars"></img>
+    } else if (rating === 4.5) {
+      return <img src="https://s3-us-west-1.amazonaws.com/yelpstars/small_4_half.png" alt="4.5 stars"></img>
+    } else if (rating === 5) {
+      return <img src="https://s3-us-west-1.amazonaws.com/yelpstars/small_5.png" alt="5 stars"></img>
+    }
+  }
 
   render() {
     // Update star rendering to: https://www.yelp.com/developers/display_requirements
@@ -71,10 +101,19 @@ class App extends Component {
       }
     });
     const restaurantListings = restaurants.map(({name, rating, url}, index) =>
-    <li key={index}><a href={url} target="_blank">{name}</a> {rating} stars</li>
-  );
+      <li key={index}><a href={url} target="_blank">{name}</a> {this.renderStars(rating)}</li>
+    );
 
-  // to do: refactor so that restaurants show up in the order they are shown on the 
+    // var query = { active: true, currentWindow: true };
+
+    // var callback = function(tabs) {
+    //   var currentTab = tabs[0]; // there will be only one in this array
+    //   console.log('current tab is: ', currentTab); // also has properties like currentTab.id
+    // }
+
+    // console.log('can I access url outside of addEventListener? Here is a test: ', url)
+
+    // to do: refactor so that restaurants show up in the order they are shown on the 
   // mealpal listings page.
   // Implementation hypothesis:
     // - change yelpRestaurants from an array to an object, where the keys are restaurant names
@@ -91,6 +130,9 @@ class App extends Component {
       <div className="App">
         <p className="Restaurant-listings">
           {restaurantListings}
+        </p>
+        <p>
+          {/* chrome tabs query is {chrome.tabs.query(query, callback)} */}
         </p>
       </div>
     );

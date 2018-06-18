@@ -1,0 +1,17 @@
+body {
+  min-width:300px;
+}
+
+.center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.header {
+  background: red;
+}
+
+.test {
+  background: grey;
+}
