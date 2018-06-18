@@ -20,7 +20,8 @@ class App extends Component {
         {name: 'Frena Bakery', address: '132 6th St.'},
         {name: 'Chaat Corner', address: '138 Cyril Magnin St.'},
         {name: 'New Delhi', address: '160 Ellis St'},
-        {name: 'Slice House', address: '680 A Second St.'}
+        {name: 'Slice House', address: '680 A Second St.'},
+        {name: 'The Melt', address: '925 Market St.'}
       ]
     }
   }
@@ -48,7 +49,12 @@ class App extends Component {
         }
       })
       .then(function (response) {
-        newYelpRestaurants.push(response.data);
+        if (response.data.name !== undefined) { 
+          // if yelp gave me back useful information like the restaurant name
+          // then add it to state so we can display to user
+          // otherwise, just ignore it
+          newYelpRestaurants.push(response.data);
+        }
         app.setState({
           yelpRestaurants: newYelpRestaurants
         });

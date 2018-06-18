@@ -20,6 +20,8 @@ body {
   border-width: .5px;
   padding: 3px 4px 3px 8px;
   font-size: large;
+  white-space: nowrap;
+  width: auto;
 }
 
 .restaurant:hover {
