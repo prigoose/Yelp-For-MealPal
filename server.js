@@ -23,7 +23,9 @@ app.get('/rating', function(req, res){
       rating = businessResponse.jsonBody.rating;
       url = businessResponse.jsonBody.url;
       name = businessResponse.jsonBody.name;
-      res.send(JSON.stringify({name, rating, url}));
+      key = businessResponse.jsonBody.id;
+      review_count = businessResponse.jsonBody.review_count;
+      res.send(JSON.stringify({name, rating, url, key, review_count}));
     }).catch(e => {
       res.send(e);
     });

@@ -10,8 +10,18 @@ body {
 
 .header {
   background: red;
+  margin-bottom: 2px;
 }
 
-.test {
-  background: grey;
+.restaurant {
+  background: #f5f5f5;
+  border-style: solid;
+  border-color: #dee0e2;
+  border-width: .5px;
+  padding: 3px 4px 3px 8px;
+  font-size: large;
+}
+
+.restaurant:hover {
+  background: #c9cedd;
 }

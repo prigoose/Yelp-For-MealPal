@@ -8,9 +8,9 @@ class App extends Component {
     super(props);
     this.state = {
       yelpRestaurants: [
-        {name: 'Veracio\'s Pizza & Ice Cream', rating: 3.5, url: 'https://www.yelp.com/biz/veracios-pizza-san-francisco'},
-        {name: 'Steap Tea Bar', rating: 4.5, url: 'https://www.yelp.com/biz/steap-tea-bar-san-francisco-3'},
-        {name: 'Schilling Cafe', rating: 3.5, url: 'https://www.yelp.com/biz/schilling-cafe-san-francisco'}
+        {name: 'Veracio\'s Pizza & Ice Cream', key: 1, rating: 3.5, url: 'https://www.yelp.com/biz/veracios-pizza-san-francisco', review_count: 73},
+        {name: 'Steap Tea Bar', key: 2, rating: 4.5, url: 'https://www.yelp.com/biz/steap-tea-bar-san-francisco-3', review_count: 52},
+        {name: 'Schilling Cafe', key: 3 ,rating: 3.5, url: 'https://www.yelp.com/biz/schilling-cafe-san-francisco', review_count: 7}
       ],
       mealpalRestaurants: [
         {name: 'Veracio\'s Pizza & Ice Cream', address: '32 6th St.'},
@@ -85,6 +85,10 @@ class App extends Component {
     }
   }
 
+  openYelpPage(url) {
+    console.log(url)
+  }
+
   render() {
     // Update star rendering to: https://www.yelp.com/developers/display_requirements
 
@@ -100,8 +104,10 @@ class App extends Component {
         return 1;
       }
     });
-    const restaurantListings = restaurants.map(({name, rating, url}, index) =>
-      <li key={index}><a href={url} target="_blank">{name}</a> {this.renderStars(rating)}</li>
+    const restaurantListings = restaurants.map(({name, rating, url, key, review_count}) =>
+      <div className="restaurant" key={key} onClick={()=> window.open(url)}>
+        <a href={url} target="_blank">{name}</a> {this.renderStars(rating)} <span>{review_count} reviews </span>
+      </div>
     );
 
     // var query = { active: true, currentWindow: true };
@@ -128,15 +134,14 @@ class App extends Component {
     // );
     return (
       <div className="App">
-        <p className="Restaurant-listings">
           {restaurantListings}
-        </p>
-        <p>
-          {/* chrome tabs query is {chrome.tabs.query(query, callback)} */}
-        </p>
       </div>
     );
   }
 }
 
 export default App;
+
+// {/* <p>
+// {/* chrome tabs query is {chrome.tabs.query(query, callback)} */}
+// </p> */}
