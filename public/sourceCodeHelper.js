@@ -25,8 +25,8 @@ function DOMtoString(document_root) {
       }
       node = node.nextSibling;
   }
-  console.log('html is: ', html);
-  return html;
+  // console.log('html is: ', html);
+  return html.toString();
 }
 
 chrome.runtime.sendMessage({

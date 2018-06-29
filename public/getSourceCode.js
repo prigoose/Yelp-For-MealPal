@@ -1,7 +1,7 @@
 chrome.runtime.onMessage.addListener(function(request, sender) {
   window.source = request.source;
-  console.log('window.source is: ', window.source);
-
+  // console.log('window.source is: ', window.source);
+  // console.log('window.source type is: ', typeof window.source) // string
 });
 
 function onWindowLoad() {
@@ -14,7 +14,6 @@ function onWindowLoad() {
       console.log('There was an error injecting script : \n' + chrome.runtime.lastError.message)
     }
   });
-
 }
 
 window.onload = onWindowLoad;
