@@ -1,46 +1,60 @@
 import React, { Component } from 'react';
 import axios from 'axios';
+import { Link, Route } from 'react-router-dom'
 import './App.css';
-let cheerio = require('cheerio');
+const cheerio = require('cheerio');
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      yelpRestaurants: [
-        {name: 'Veracio\'s Pizza & Ice Cream', key: 1, rating: 3.5, url: 'https://www.yelp.com/biz/veracios-pizza-san-francisco', review_count: 73},
-        {name: 'Steap Tea Bar', key: 2, rating: 4.5, url: 'https://www.yelp.com/biz/steap-tea-bar-san-francisco-3', review_count: 52},
-        {name: 'Schilling Cafe', key: 3 ,rating: 3.5, url: 'https://www.yelp.com/biz/schilling-cafe-san-francisco', review_count: 7}
-      ],
-      mealpalRestaurants: [
-        {name: 'Veracio\'s Pizza & Ice Cream', address: '32 6th St.'},
-        {name: 'Steap Tea Bar', address: '827 Sacramento St'},
-        {name: 'Schilling Cafe', address: '667-669 Commercial St.'},
-        {name: 'Battery St. Coffee Roastery', address: '950 Battery St.'},
-        {name: 'Frena Bakery', address: '132 6th St.'},
-        {name: 'Chaat Corner', address: '138 Cyril Magnin St.'},
-        {name: 'New Delhi', address: '160 Ellis St'},
-        {name: 'Slice House', address: '680 A Second St.'},
-        {name: 'The Melt', address: '925 Market St.'}
-      ]
-    }
+      mealpalRestaurants: [],
+      yelpRestaurants: [],
+      sortedRestaurants: [],
+      sourceLoaded: false,
+      buttons: false
+    };
+    this.callApi = this.callApi.bind(this);
+    this.alphabeticSort = this.alphabeticSort.bind(this);
+    // this.numericSort = this.numericSort.bind(this);
+    this.ratingSort = this.ratingSort.bind(this);
+    this.hardRefresh = this.hardRefresh.bind(this);
+    this.isScrapingDone = this.isScrapingDone.bind(this);
   }
 
   componentDidMount() {
-    // for final version, set this.state.mealpalRestaurants = []; 
-    // then use webcrawler to grab restaurants from mealpal listings page
-    // make sure to cut anything after the dash, because yelp will get confused and give you worse responses
-      // e.g. `Tokyo Express- Moscone Center` returns Samovar Tea Lounge. 
-      // But `Tokyo Express` returns Tokyo Express
-    // then push restaurants into array
+    setInterval(() => this.isScrapingDone(),1000);
+  }
 
+  isScrapingDone() {
+    if (window.source && this.state.sourceLoaded === false) {
+      let $ = cheerio.load(window.source);
+      let mealpalRestaurants = [];
+      let restaurantNames = [];
+      $('div.restaurant div.name').not('.meal').each(function(i, elem) {
+        mealpalRestaurants[i] = {'name': $(this).text()};
+        // make sure to cut anything after the dash, because yelp will get confused and give you worse responses
+        // e.g. `Tokyo Express- Moscone Center` returns Samovar Tea Lounge. 
+        // But `Tokyo Express` returns Tokyo Express
+        // then push restaurants into array
+      });
+
+      let restaurantAddresses = [];
+      $('div.restaurant div.address').each(function(i, elem) {
+        mealpalRestaurants[i].address = $(this).text();
+      });
+      console.log('mealpal Restaurants is: ', mealpalRestaurants)
+      
+      this.setState({
+        sourceLoaded: true,
+        mealpalRestaurants: mealpalRestaurants,
+      }, this.callApi)
+    }
+  }
+  
+  callApi() {
     const newYelpRestaurants = [];
-
-    // In order to move quickly, I'm saving the value of 
-    // `this` with a variable called `app`
-    // Refactor later
-    const app = this;
-
+    let app = this;
     this.state.mealpalRestaurants.forEach(restaurant => {
       axios.get('http://localhost:3002/rating', {
         params: {
@@ -50,21 +64,24 @@ class App extends Component {
       })
       .then(function (response) {
         if (response.data.name !== undefined) { 
-          // if yelp gave me back useful information like the restaurant name
+          // TEMPORARY FIX: if yelp gave me back useful information like the restaurant name
           // then add it to state so we can display to user
           // otherwise, just ignore it
           newYelpRestaurants.push(response.data);
+          app.setState({
+            yelpRestaurants: newYelpRestaurants,
+            sortedRestaurants: newYelpRestaurants,
+            buttons: true
+          });
         }
-        app.setState({
-          yelpRestaurants: newYelpRestaurants
-        });
       })
       .catch(function (error) {
         console.log(error);
+        // To update: rather than just logging error, retry request
       });
     })
   }
-
+  
   renderStars(rating) {
     if (rating === 0) {
       return <img src="https://s3-us-west-1.amazonaws.com/yelpstars/small_0.png" alt="0 stars"></img>
@@ -91,18 +108,26 @@ class App extends Component {
     }
   }
 
-  openYelpPage(url) {
-    console.log(url)
+  /* --> BUTTON HANDLERS <-- */
+  
+  ratingSort() {
+    let sortedRestaurants = [...this.state.yelpRestaurants];
+    sortedRestaurants.sort((a,b) => {
+      if (a.rating > b.rating) {
+        return -1;
+      }
+      else {
+        return 1;
+      }
+    });
+    this.setState({
+      sortedRestaurants: sortedRestaurants
+    })
   }
-
-  render() {
-    // Update star rendering to: https://www.yelp.com/developers/display_requirements
-
-    // I'm worried about performing an expensive sorting operation on the client side
-    // but I'll do it for an MVP implementation
-    // Ask Danny for advice moving forward
-    var restaurants = [...this.state.yelpRestaurants];
-    restaurants.sort((a,b) => {
+  
+  alphabeticSort() {
+    let sortedRestaurants = [...this.state.yelpRestaurants];
+    sortedRestaurants.sort((a,b) => {
       if (a.name < b.name) {
         return -1;
       }
@@ -110,44 +135,56 @@ class App extends Component {
         return 1;
       }
     });
-    const restaurantListings = restaurants.map(({name, rating, url, key, review_count}) =>
+    this.setState({
+      sortedRestaurants: sortedRestaurants
+    })
+  }
+
+  // currently, this.state.yelpRestaurants is not in order. 
+  // Need to change get request so that it returns an ordered array
+  // Should be able to do this using promises -- look up
+  // numericSort() {
+    //   let originalOrder = this.state.yelpRestaurants;
+    //   this.setState({
+      //     sortedRestaurants: this.state.yelpRestaurants
+      //   })
+      // }
+  
+  hardRefresh() {
+        window.location.reload(true);
+  }
+
+  render() {
+    const restaurantListings = this.state.sortedRestaurants.map(({name, rating, url, key, review_count}) =>
       <div className="restaurant" key={key} onClick={()=> window.open(url)}>
         <a href={url} target="_blank">{name}</a> {this.renderStars(rating)} <span>{review_count} reviews </span>
       </div>
     );
-
-    // var query = { active: true, currentWindow: true };
-
-    // var callback = function(tabs) {
-    //   var currentTab = tabs[0]; // there will be only one in this array
-    //   console.log('current tab is: ', currentTab); // also has properties like currentTab.id
-    // }
-
-    // console.log('can I access url outside of addEventListener? Here is a test: ', url)
-
-    // to do: refactor so that restaurants show up in the order they are shown on the 
-  // mealpal listings page.
-  // Implementation hypothesis:
-    // - change yelpRestaurants from an array to an object, where the keys are restaurant names
-    // - map the mealpalRestaurants array (which is in the correct order) to divs, grabbing
-      // relevant data from yelpRestaurants with restaurant name'
-  // this.state.mealpalRestaurants.map(({name}, index) => 
-  //   <li key={index}><a href={url} target="_blank">{name}</a> {rating} stars</li>
-  // )
-
-    // const restaurantListings = this.state.yelpRestaurants.map(({name, rating, url}, index) =>
-    //   <li key={index}><a href={url} target="_blank">{name}</a> {rating} stars</li>
-    // );
+    let buttons = '';
+    if (this.state.buttons) {
+      buttons =   
+      <div className="col-3">          
+        <i className="fa fa-star" onClick={this.ratingSort}></i>
+        <i className="fa fa-sort-alpha-down" onClick={this.alphabeticSort}></i>
+        {/* <i className="fa fa-sort-numeric-down" onClick={this.numericSort}></i> */}
+        <i className="fa fa-sync-alt" onClick={this.hardRefresh}></i>
+      </div>
+    }
+    
     return (
-      <div className="App">
-          {restaurantListings}
+      <div>
+        <div className="header row align-items-center">
+          <div className="col-9">
+            <img src="https://s3-us-west-1.amazonaws.com/yelplogo/Yelp_trademark_RGB.png" width="100"></img>
+          </div>
+            {buttons}
+        </div>
+        <div className="App">
+            {restaurantListings}
+        </div>
       </div>
     );
   }
 }
 
 export default App;
-
-// {/* <p>
-// {/* chrome tabs query is {chrome.tabs.query(query, callback)} */}
-// </p> */}
