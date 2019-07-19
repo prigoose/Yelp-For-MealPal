@@ -7,9 +7,9 @@ This Chrome extension crawls the listings page for the restaurants listed, and t
 
 ## Tech 
 
-- React for front-end design
-- Express as the server
 - Cheerio.js for web crawling
+- React for front-end
+- Express as the server
 - Yelp Fusion API for restaurant data
 
 ## Setup
